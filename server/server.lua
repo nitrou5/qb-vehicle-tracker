@@ -24,28 +24,34 @@ RegisterNetEvent('qb_vehicle_tracker:server:placeTracker', function(vehNetID, ve
         TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[config.trackerTabletItem], 'add')
     end
 
-    activeTrackers[vehPlate] = vehNetID
+    if activeTrackers[source] == nil then
+        activeTrackers[source] = {}
+    end
+
+    activeTrackers[source][vehPlate] = vehNetID
 end)
 
 RegisterNetEvent('qb_vehicle_tracker:server:removeTracker', function(vehPlate, slot)
-    if activeTrackers[vehPlate] == nil then return end
+    if activeTrackers[source] == nil or activeTrackers[source][vehPlate] == nil then return end
 
     local Player = QBCore.Functions.GetPlayer(source)
 
-    if Player.Functions.RemoveItem(config.trackerScannerItem, 1, slot) then 
-        TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[config.trackerScannerItem], 'remove')        
+    if Player.Functions.RemoveItem(config.trackerScannerItem, 1, slot) then
+        TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[config.trackerScannerItem], 'remove')
     end
 
-    activeTrackers[vehPlate] = nil
+    activeTrackers[source][vehPlate] = nil
 end)
 
 -- Callback
-lib.callback.register('qb_vehicle_tracker:server:getTrackedVehicle', function(_, vehPlate)
-    local veh = NetworkGetEntityFromNetworkId(activeTrackers[vehPlate])
+lib.callback.register('qb_vehicle_tracker:server:getTrackedVehicle', function(source, vehPlate)
+    if vehPlate == nil then return end
 
-    if not DoesEntityExist(veh) then return end
+    local vehicleEntity = NetworkGetEntityFromNetworkId(activeTrackers[source][vehPlate])
 
-    local vehCoords = GetEntityCoords(veh)
+    if not DoesEntityExist(vehicleEntity) then return end
 
-    return activeTrackers[vehPlate], vector2(vehCoords.x, vehCoords.y)
+    local vehCoords = GetEntityCoords(vehicleEntity)
+
+    return activeTrackers[source][vehPlate], vector2(vehCoords.x, vehCoords.y)
 end)
