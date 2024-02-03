@@ -1,0 +1,19 @@
+{
+  "vt_menu_header": "Vehicle GPS Tracker",
+  "vt_menu_check_location": "Check GPS Location",
+  "vt_placed_success": "The GPS tracker was successfully placed on the vehicle!",
+  "vt_remove_success": "The GPS tracker was removed from the vehicle.",
+  "vt_connection_success": "Connection successful! Location is set on your Map.",
+  "vt_already_tracking": "You are already tracking this vehicle.",
+  "vt_no_tracker": "No GPS Tracker found on this vehicle.",
+  "vt_not_placed": "This GPS Tracker is not placed on a vehicle.",
+  "vt_no_vehicle_nearby": "No vehicle nearby!",
+  "vt_unable_connect": "Unable to connect to the tracker!",
+  "vt_pb_connecting": "Connecting...",
+  "vt_pb_placing": "Placing GPS Tracker...",
+  "vt_pb_scanning": "Scanning...",
+  "vt_pb_removing": "Removing GPS Tracker...",
+  "vt_pb_cancelled": "Cancelled",
+  "vt_alert_title": "GPS Tracker Found!",
+  "vt_alert_description": "You have found a GPS Tracker! Do you want to remove it?"
+}
