@@ -6,8 +6,9 @@
 a simple Vehicle GPS Tracker resource for QBCore.
 
 ## Dependencies
-### [qb-core](https://github.com/qbcore-framework/qb-core)
-### [ox_lib](https://github.com/overextended/ox_lib)
+- [qb-core](https://github.com/qbcore-framework/qb-core)
+- [ox_lib](https://github.com/overextended/ox_lib)
+- [oxmysql](https://github.com/overextended/oxmysql)
 
 ## Installation
 1) Add the following items into your qb-core/shared/items.lua:
@@ -19,7 +20,9 @@ vehicletrackerscanner       = { name = 'vehicletrackerscanner', label = 'Vehicle
 
 2) Move all images from img/ folder to your inventory image folder. example qb-inventory/html/images
 
-## Usage 
+3) Run **sql/vehicle_trackers.sql** to create the DB table
+
+## Usage
 - You must be near a vehicle and **USE** the **vehicletracker** item.
 - After using the vehicletracker **USE** the **vehicletrackertablet** you will receive to check its Location.
 - **vehicletrackerscanner** can be used to scan and remove a tracker from a vehicle.
