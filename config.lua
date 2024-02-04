@@ -1,5 +1,6 @@
 return {
     trackerItem = 'vehicletracker',
     trackerTabletItem = 'vehicletrackertablet',
-    trackerScannerItem = 'vehicletrackerscanner'
+    trackerScannerItem = 'vehicletrackerscanner',
+    dbTableName = 'vehicle_trackers'
 }
