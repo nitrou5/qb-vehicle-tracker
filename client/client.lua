@@ -65,7 +65,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:scanTracker', function(slot)
             rot = vec3(10.0, 160.0, 0.0)
         },
     }) then
-        lib.callback('qb_vehicle_tracker:server:getTrackedVehicle', false, function(veh) 
+        lib.callback('qb_vehicle_tracker:server:getTrackedVehicle', false, function(veh)
             if veh == nil then return uiNotify(locale('vt_no_tracker'), 'info') end
 
             TriggerServerEvent('InteractSound_SV:PlayOnSource', 'panicbutton', 0.2)
@@ -81,8 +81,8 @@ RegisterNetEvent('qb_vehicle_tracker:client:scanTracker', function(slot)
                 TriggerEvent('qb_vehicle_tracker:client:removeTracker', slot)
             end
         end, lib.getVehicleProperties(vehicle).plate)
-    else 
-        uiNotify(locale('vt_pb_cancelled'), 'error') 
+    else
+        uiNotify(locale('vt_pb_cancelled'), 'error')
     end
 end)
 
@@ -106,7 +106,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:placeTracker', function(slot)
             clip = 'car_bomb_mechanic'
         }
     }) then
-        TriggerServerEvent('qb_vehicle_tracker:server:placeTracker', NetworkGetNetworkIdFromEntity(vehicle), lib.getVehicleProperties(vehicle).plate, slot) 
+        TriggerServerEvent('qb_vehicle_tracker:server:placeTracker', NetworkGetNetworkIdFromEntity(vehicle), lib.getVehicleProperties(vehicle).plate, slot)
         TriggerServerEvent('InteractSound_SV:PlayOnSource', 'Clothes1', 0.2)
         uiNotify(locale('vt_placed_success'), 'success')
     else
@@ -142,7 +142,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:removeTracker', function(slot)
             if trackedVehicles[vehPlate] then
                 RemoveBlip(trackedVehicles[vehPlate])
 
-                trackedVehicles[vehPlate] = nil        
+                trackedVehicles[vehPlate] = nil
             end
 
             TriggerServerEvent('qb_vehicle_tracker:server:removeTracker', vehPlate, slot)
@@ -188,7 +188,7 @@ CreateThread(function()
         for vehPlate, blip in pairs(trackedVehicles) do
             if GetBlipAlpha(blip) > 0 then
                 SetBlipAlpha(blip, GetBlipAlpha(blip) - 10)
-            else 
+            else
                 trackedVehicles[vehPlate] = nil
                 RemoveBlip(blip)
             end
