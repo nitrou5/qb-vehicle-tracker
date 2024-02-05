@@ -13,7 +13,12 @@ RegisterNetEvent('qb_vehicle_tracker:client:manageTracker', function(serialNumbe
         id = 'vt_menu',
         title = locale('vt_menu_header'),
         options = {
-            {title = locale('vt_menu_check_location'), event = 'qb_vehicle_tracker:client:locateTracker', icon = 'eye', args = serialNumber}
+            {
+                title = locale('vt_menu_check_location'),
+                event = 'qb_vehicle_tracker:client:locateTracker',
+                icon = 'eye',
+                args = serialNumber
+            }
         }
     })
 
@@ -105,7 +110,9 @@ RegisterNetEvent('qb_vehicle_tracker:client:placeTracker', function(slot, serial
             clip = 'car_bomb_mechanic'
         }
     }) then
-        TriggerServerEvent('qb_vehicle_tracker:server:placeTracker', NetworkGetNetworkIdFromEntity(vehicle), GetVehicleNumberPlateText(vehicle), slot, serialNumber)
+        TriggerServerEvent('qb_vehicle_tracker:server:placeTracker',
+                            NetworkGetNetworkIdFromEntity(vehicle), GetVehicleNumberPlateText(vehicle),
+                            slot, serialNumber)
         TriggerEvent('InteractSound_CL:PlayOnOne', 'Clothes1', 0.3)
         uiNotify(locale('vt_placed_success'), 'success')
     else
