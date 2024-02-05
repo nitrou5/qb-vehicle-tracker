@@ -26,3 +26,6 @@ vehicletrackerscanner       = { name = 'vehicletrackerscanner', label = 'Vehicle
 - You must be near a vehicle and **USE** the **vehicletracker** item.
 - After using the vehicletracker **USE** the **vehicletrackertablet** you will receive to check its Location.
 - **vehicletrackerscanner** can be used to scan and remove a tracker from a vehicle.
+
+## Notes
+- Trackers records older than 7 days will be automatically deleted from db table. if you want to change/stop this behaviour: https://github.com/nitrou5/qb-vehicle-tracker/blob/main/server/server.lua#L46
