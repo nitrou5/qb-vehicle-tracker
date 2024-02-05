@@ -182,7 +182,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:locateTracker', function(serialNumbe
 
         trackedVehicles[serialNumber] = blip
 
-        TriggerEvent('InteractSound_CL:PlayOnOne', 'pager', 0.3)
+        TriggerEvent('InteractSound_CL:PlayOnOne', 'monkeyopening', 0.3)
         uiNotify(locale('vt_connection_success'), 'success')
 
     end, serialNumber)
