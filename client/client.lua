@@ -67,7 +67,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:scanTracker', function(slot)
         lib.callback('qb_vehicle_tracker:server:isVehicleTracked', false, function(veh)
             if veh == nil then return uiNotify(locale('vt_no_tracker'), 'info') end
 
-            TriggerServerEvent('InteractSound_SV:PlayOnSource', 'panicbutton', 0.2)
+            TriggerEvent('InteractSound_CL:PlayOnOne', 'metaldetected', 0.3)
 
             local alert = lib.alertDialog({
                 header = locale('vt_alert_title'),
@@ -106,7 +106,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:placeTracker', function(slot, serial
         }
     }) then
         TriggerServerEvent('qb_vehicle_tracker:server:placeTracker', NetworkGetNetworkIdFromEntity(vehicle), GetVehicleNumberPlateText(vehicle), slot, serialNumber)
-        TriggerServerEvent('InteractSound_SV:PlayOnSource', 'Clothes1', 0.3)
+        TriggerEvent('InteractSound_CL:PlayOnOne', 'Clothes1', 0.3)
         uiNotify(locale('vt_placed_success'), 'success')
     else
         uiNotify(locale('vt_pb_cancelled'), 'error')
@@ -145,7 +145,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:removeTracker', function(slot)
             end
 
             TriggerServerEvent('qb_vehicle_tracker:server:removeTracker', vehPlate, slot)
-            TriggerServerEvent('InteractSound_SV:PlayOnSource', 'metaldetector', 0.2)
+            TriggerEvent('InteractSound_CL:PlayOnOne', 'metaldetector', 0.3)
             uiNotify(locale('vt_remove_success'), 'success')
         else
             uiNotify(locale('vt_pb_cancelled'), 'error')
@@ -175,7 +175,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:locateTracker', function(serialNumbe
 
         trackedVehicles[serialNumber] = blip
 
-        TriggerServerEvent('InteractSound_SV:PlayOnSource', 'robberysound', 0.2)
+        TriggerEvent('InteractSound_CL:PlayOnOne', 'pager', 0.3)
         uiNotify(locale('vt_connection_success'), 'success')
 
     end, serialNumber)
