@@ -2,17 +2,8 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local config = require 'config'
 
 -- Functions
-function GetRandomSerialNumber()
-    local charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    local result = ""
-    math.randomseed(os.time())
-
-    for _ = 1, 11 do
-        local randomIndex = math.random(1, #charset)
-        result = result .. string.sub(charset, randomIndex, randomIndex)
-    end
-
-    return result
+local function GetRandomSerialNumber()
+    return lib.string.random('...........')
 end
 
 local function GetVehicleNetworkIdByPlate(vehiclePlate)
