@@ -1,26 +1,11 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local config = require 'config'
-
--- Functions
-local function GetRandomSerialNumber()
-    return lib.string.random('...........')
-end
-
-local function GetVehicleNetworkIdByPlate(vehiclePlate)
-    local vehicles = GetAllVehicles()
-
-    for _, vehicle in ipairs(vehicles) do
-        if GetVehicleNumberPlateText(vehicle) == vehiclePlate then
-            return NetworkGetNetworkIdFromEntity(vehicle)
-        end
-    end
-
-    return nil
-end
+local utils = require 'server.utils'
+local db = require 'server.db'
 
 -- Usable Items
 QBCore.Functions.CreateUseableItem(config.trackerItem, function(source, item)
-    TriggerClientEvent('qb_vehicle_tracker:client:placeTracker', source, item.slot, GetRandomSerialNumber())
+    TriggerClientEvent('qb_vehicle_tracker:client:placeTracker', source, item.slot, utils.getRandomSerialNumber())
 end)
 
 QBCore.Functions.CreateUseableItem(config.trackerTabletItem, function(source, item)
@@ -33,8 +18,8 @@ end)
 
 -- Events
 AddEventHandler('onResourceStart', function(resourceName)
-    if GetCurrentResourceName() == resourceName then
-        MySQL.query.await('DELETE FROM `vehicle_trackers` WHERE startedAt < (NOW() - INTERVAL 7 DAY)')
+    if cache.resource == resourceName then
+        db.deleteOldTrackers()
     end
 end)
 
@@ -44,12 +29,12 @@ RegisterNetEvent('qb_vehicle_tracker:server:placeTracker', function(vehicleNetID
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 
-    if Player.Functions.AddItem(config.trackerTabletItem, 1, false, { plate = vehiclePlate, serialNumber = serialNumber }) then
+    if not db.addTracker(serialNumber, utils.trim(vehiclePlate)) then return end
+
+    if Player.Functions.AddItem(config.trackerTabletItem, 1, false, { plate = utils.trim(vehiclePlate), serialNumber = serialNumber }) then
         Player.Functions.RemoveItem(config.trackerItem, 1, slot)
         TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[config.trackerTabletItem], 'add')
     end
-
-    MySQL.prepare.await('INSERT INTO `vehicle_trackers` (`serialNumber`, `vehiclePlate`) VALUES (?, ?)', {serialNumber, vehiclePlate})
 end)
 
 RegisterNetEvent('qb_vehicle_tracker:server:removeTracker', function(vehiclePlate, slot)
@@ -58,7 +43,7 @@ RegisterNetEvent('qb_vehicle_tracker:server:removeTracker', function(vehiclePlat
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 
-    MySQL.prepare.await('DELETE FROM `vehicle_trackers` WHERE `vehiclePlate` = ?', {vehiclePlate})
+    if not db.deleteTracker(utils.trim(vehiclePlate)) then return end
 
     if Player.Functions.RemoveItem(config.trackerScannerItem, 1, slot) then
         TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[config.trackerScannerItem], 'remove')
@@ -66,19 +51,16 @@ RegisterNetEvent('qb_vehicle_tracker:server:removeTracker', function(vehiclePlat
 end)
 
 -- Callbacks
-lib.callback.register('qb_vehicle_tracker:server:getTrackedVehicleBySerial', function(source, serialNumber)
+lib.callback.register('qb_vehicle_tracker:server:getTrackedVehicleBySerial', function(_, serialNumber)
     if not serialNumber then return end
 
-    local tracker = MySQL.single.await('SELECT `serialNumber`, `vehiclePlate` FROM `vehicle_trackers` WHERE `serialNumber` = ? LIMIT 1', {serialNumber})
-
+    local tracker = db.getTracker(serialNumber)
     if not tracker then return end
 
-    local vehicleNetworkID = GetVehicleNetworkIdByPlate(tracker.vehiclePlate)
-
+    local vehicleNetworkID = utils.getVehicleNetworkIdByPlate(tracker.vehiclePlate)
     if not vehicleNetworkID then return end
 
     local vehicleEntity = NetworkGetEntityFromNetworkId(vehicleNetworkID)
-
     if not DoesEntityExist(vehicleEntity) then return end
 
     local vehCoords = GetEntityCoords(vehicleEntity)
@@ -86,8 +68,8 @@ lib.callback.register('qb_vehicle_tracker:server:getTrackedVehicleBySerial', fun
     return tracker.vehiclePlate, vector2(vehCoords.x, vehCoords.y)
 end)
 
-lib.callback.register('qb_vehicle_tracker:server:isVehicleTracked', function(source, vehiclePlate)
+lib.callback.register('qb_vehicle_tracker:server:isVehicleTracked', function(_, vehiclePlate)
     if not vehiclePlate then return end
 
-    return MySQL.single.await('SELECT `serialNumber` FROM `vehicle_trackers` WHERE `vehiclePlate` = ? LIMIT 1', { vehiclePlate })
+    return db.isTracked(utils.trim(vehiclePlate))
 end)
