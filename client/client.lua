@@ -4,7 +4,7 @@ lib.locale()
 
 -- Function
 local function uiNotify(description, nType)
-    lib.notify({description = description, type = nType, position = 'center-right', iconAnimation = 'bounce', duration = 6500})
+    lib.notify({description = description, type = nType, position = 'center-right', iconAnimation = 'bounce', duration = 7000})
 end
 
 -- Events
@@ -60,16 +60,17 @@ RegisterNetEvent('qb_vehicle_tracker:client:scanTracker', function(slot)
             combat = true
         },
         anim = {
-            dict = 'amb@code_human_in_bus_passenger_idles@female@tablet@base',
-            clip = 'base'
+            dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+            clip = 'machinic_loop_mechandplayer',
+            flag = 1
         },
         prop = {
-            model = `prop_cs_tablet`,
-            pos = vec3(0.03, 0.002, -0.0),
-            rot = vec3(10.0, 160.0, 0.0)
-        },
+            model = `w_am_digiscanner`,
+            pos = vec3(0.06, 0.03, -0.1),
+            rot = vec3(10.0, 190.0, 0.0)
+        }
     }) then
-        lib.callback('qb_vehicle_tracker:server:isVehicleTracked', false, function(veh)
+        lib.callback('qb_vehicle_tracker:isVehicleTracked', false, function(veh)
             if veh == nil then return uiNotify(locale('vt_no_tracker'), 'info') end
 
             TriggerEvent('InteractSound_CL:PlayOnOne', 'metaldetected', 0.3)
@@ -91,7 +92,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:scanTracker', function(slot)
 end)
 
 RegisterNetEvent('qb_vehicle_tracker:client:placeTracker', function(slot, serialNumber)
-    local vehicle = lib.getClosestVehicle(GetEntityCoords(cache.ped), 3.0, true)
+    local vehicle = lib.getClosestVehicle(GetEntityCoords(cache.ped), 2.5, true)
 
     if vehicle == nil or not DoesEntityExist(vehicle) then return uiNotify(locale('vt_no_vehicle_nearby'), 'error') end
 
@@ -106,15 +107,21 @@ RegisterNetEvent('qb_vehicle_tracker:client:placeTracker', function(slot, serial
             combat = true
         },
         anim = {
-            dict = 'mp_car_bomb',
-            clip = 'car_bomb_mechanic'
+            dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+            clip = 'machinic_loop_mechandplayer',
+            flag = 1
+        },
+        prop = {
+            model = `prop_prototype_minibomb`,
+            pos = vec3(0.1, 0.03, -0.0),
+            rot = vec3(10.0, 160.0, 0.0)
         }
     }) then
-        TriggerServerEvent('qb_vehicle_tracker:server:placeTracker',
-                            NetworkGetNetworkIdFromEntity(vehicle), GetVehicleNumberPlateText(vehicle),
-                            slot, serialNumber)
-        TriggerEvent('InteractSound_CL:PlayOnOne', 'Clothes1', 0.3)
-        uiNotify(locale('vt_placed_success'), 'success')
+        lib.callback('qb_vehicle_tracker:placeTracker', false, function(success)
+            if not success then return end
+            TriggerEvent('InteractSound_CL:PlayOnOne', 'Clothes1', 0.3)
+            uiNotify(locale('vt_placed_success'), 'success')
+        end, GetVehicleNumberPlateText(vehicle), slot, serialNumber)
     else
         uiNotify(locale('vt_pb_cancelled'), 'error')
     end
@@ -127,7 +134,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:removeTracker', function(slot)
 
     local vehPlate = GetVehicleNumberPlateText(vehicle)
 
-    lib.callback('qb_vehicle_tracker:server:isVehicleTracked', false, function(veh)
+    lib.callback('qb_vehicle_tracker:isVehicleTracked', false, function(veh)
         if veh == nil then return uiNotify(locale('vt_no_tracker'), 'info') end
 
         if lib.progressBar({
@@ -141,19 +148,23 @@ RegisterNetEvent('qb_vehicle_tracker:client:removeTracker', function(slot)
                 combat = true
             },
             anim = {
-                dict = 'mp_car_bomb',
-                clip = 'car_bomb_mechanic'
+                dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+                clip = 'machinic_loop_mechandplayer',
+                flag = 1
             }
         }) then
-            if trackedVehicles[veh.serialNumber] then
-                RemoveBlip(trackedVehicles[veh.serialNumber])
+            lib.callback('qb_vehicle_tracker:removeTracker', false, function(success)
+                if not success then return end
 
-                trackedVehicles[veh.serialNumber] = nil
-            end
+                if trackedVehicles[veh.serialNumber] then
+                    RemoveBlip(trackedVehicles[veh.serialNumber])
 
-            TriggerServerEvent('qb_vehicle_tracker:server:removeTracker', vehPlate, slot)
-            TriggerEvent('InteractSound_CL:PlayOnOne', 'metaldetector', 0.3)
-            uiNotify(locale('vt_remove_success'), 'success')
+                    trackedVehicles[veh.serialNumber] = nil
+                end
+
+                TriggerEvent('InteractSound_CL:PlayOnOne', 'metaldetector', 0.3)
+                uiNotify(locale('vt_remove_success'), 'success')
+            end, vehPlate, slot)
         else
             uiNotify(locale('vt_pb_cancelled'), 'error')
         end
@@ -164,7 +175,7 @@ end)
 RegisterNetEvent('qb_vehicle_tracker:client:locateTracker', function(serialNumber)
     if serialNumber == nil then return uiNotify(locale('vt_not_placed'), 'error') end
 
-    lib.callback('qb_vehicle_tracker:server:getTrackedVehicleBySerial', false, function(veh, vehCoords)
+    lib.callback('qb_vehicle_tracker:getTrackedVehicleBySerial', false, function(veh, vehCoords)
         if veh == nil then return uiNotify(locale('vt_unable_connect'), 'error') end
 
         local blip = AddBlipForCoord(vehCoords.x , vehCoords.y, 0.0)
