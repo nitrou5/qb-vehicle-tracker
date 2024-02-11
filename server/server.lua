@@ -3,7 +3,7 @@ local config = require 'config'
 local utils = require 'server.utils'
 local db = require 'server.db'
 
--- Usable Items
+-- QB Usable Items
 QBCore.Functions.CreateUseableItem(config.trackerItem, function(source, item)
     TriggerClientEvent('qb_vehicle_tracker:client:placeTracker', source, item.slot, utils.getRandomSerialNumber())
 end)
@@ -17,7 +17,7 @@ QBCore.Functions.CreateUseableItem(config.trackerScannerItem, function(source, i
     TriggerClientEvent('qb_vehicle_tracker:client:scanTracker', source, item.slot)
 end)
 
--- Events
+-- Event Handler
 AddEventHandler('onResourceStart', function(resourceName)
     if cache.resource == resourceName then
         db.deleteOldTrackers()
@@ -26,7 +26,7 @@ end)
 
 -- Callbacks
 lib.callback.register('qb_vehicle_tracker:getTrackedVehicleBySerial', function(_, serialNumber)
-    if not serialNumber then return end
+    if type(serialNumber) ~= "string" or string.len(serialNumber) < 11 then return end
 
     local tracker = db.getTracker(serialNumber)
     if not tracker then return end
@@ -42,19 +42,20 @@ lib.callback.register('qb_vehicle_tracker:getTrackedVehicleBySerial', function(_
     return tracker.vehiclePlate, vector2(vehCoords.x, vehCoords.y)
 end)
 
-lib.callback.register('qb_vehicle_tracker:isVehicleTracked', function(_, vehiclePlate)
-    if not vehiclePlate then return end
+lib.callback.register('qb_vehicle_tracker:isVehicleTracked', function(source, vehiclePlate)
+    if type(vehiclePlate) ~= "string" or not utils.isPlayerNearVehicle(GetEntityCoords(GetPlayerPed(source)), vehiclePlate) then
+        return false
+    end
 
     return db.isTracked(utils.trim(vehiclePlate))
 end)
 
 lib.callback.register('qb_vehicle_tracker:placeTracker', function(source, vehiclePlate, slot, serialNumber)
-    if not vehiclePlate or not serialNumber then return end
-
-    local Player = QBCore.Functions.GetPlayer(source)
-
+    if type(vehiclePlate) ~= "string" or type(serialNumber) ~= "string" or string.len(serialNumber) < 11 then return false end
+    if not utils.isPlayerNearVehicle(GetEntityCoords(GetPlayerPed(source)), vehiclePlate) then return false end
     if not db.addTracker(serialNumber, utils.trim(vehiclePlate)) then return false end
 
+    local Player = QBCore.Functions.GetPlayer(source)
     if Player.Functions.AddItem(config.trackerTabletItem, 1, false, { plate = utils.trim(vehiclePlate), serialNumber = serialNumber }) then
         Player.Functions.RemoveItem(config.trackerItem, 1, slot)
         TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[config.trackerTabletItem], 'add')
@@ -64,12 +65,13 @@ lib.callback.register('qb_vehicle_tracker:placeTracker', function(source, vehicl
 end)
 
 lib.callback.register('qb_vehicle_tracker:removeTracker', function(source, vehiclePlate, slot)
-    if not vehiclePlate then return end
-
-    local Player = QBCore.Functions.GetPlayer(source)
+    if type(vehiclePlate) ~= "string" or not utils.isPlayerNearVehicle(GetEntityCoords(GetPlayerPed(source)), vehiclePlate) then
+        return false
+    end
 
     if not db.deleteTracker(utils.trim(vehiclePlate)) then return false end
 
+    local Player = QBCore.Functions.GetPlayer(source)
     if Player.Functions.RemoveItem(config.trackerScannerItem, 1, slot) then
         TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[config.trackerScannerItem], 'remove')
     end
