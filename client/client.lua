@@ -2,9 +2,25 @@ local trackedVehicles = {}
 
 lib.locale()
 
--- Function
+-- Functions
 local function uiNotify(description, nType)
     lib.notify({description = description, type = nType, position = 'center-right', iconAnimation = 'bounce', duration = 7000})
+end
+
+local function uiProgressBar(duration, label, anim, prop)
+    return lib.progressBar({
+            duration = duration,
+            label = label,
+            useWhileDead = false,
+            canCancel = true,
+            disable = {
+                car = true,
+                move = true,
+                combat = true
+            },
+            anim = anim,
+            prop = prop
+    })
 end
 
 -- Events
@@ -22,53 +38,28 @@ RegisterNetEvent('qb_vehicle_tracker:client:manageTracker', function(serialNumbe
         }
     })
 
-    if lib.progressBar({
-        duration = 2000,
-        label = locale('vt_pb_connecting'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            car = true,
-            move = true,
-            combat = true
-        },
-        anim = {
-            dict = 'amb@code_human_in_bus_passenger_idles@female@tablet@base',
-            clip = 'base'
-        },
-        prop = {
-            model = `prop_cs_tablet`,
-            pos = vec3(0.03, 0.002, -0.0),
-            rot = vec3(10.0, 160.0, 0.0)
-        },
+    if uiProgressBar(2000, locale('vt_pb_connecting'), {
+        dict = 'amb@code_human_in_bus_passenger_idles@female@tablet@base',
+        clip = 'base'
+    }, {
+        model = `prop_cs_tablet`,
+        pos = vec3(0.03, 0.002, -0.0),
+        rot = vec3(10.0, 160.0, 0.0)
     }) then lib.showContext('vt_menu') else uiNotify(locale('vt_pb_cancelled'), 'error') end
 end)
 
 RegisterNetEvent('qb_vehicle_tracker:client:scanTracker', function(slot)
     local vehicle = lib.getClosestVehicle(GetEntityCoords(cache.ped), 3.0, true)
+    if vehicle == nil or not DoesEntityExist(vehicle) then uiNotify(locale('vt_no_vehicle_nearby'), 'error') return end
 
-    if vehicle == nil or not DoesEntityExist(vehicle) then return uiNotify(locale('vt_no_vehicle_nearby'), 'error') end
-
-    if lib.progressBar({
-        duration = 6000,
-        label = locale('vt_pb_scanning'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            car = true,
-            move = true,
-            combat = true
-        },
-        anim = {
-            dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
-            clip = 'machinic_loop_mechandplayer',
-            flag = 1
-        },
-        prop = {
-            model = `w_am_digiscanner`,
-            pos = vec3(0.06, 0.03, -0.1),
-            rot = vec3(10.0, 190.0, 0.0)
-        }
+    if uiProgressBar(6000, locale('vt_pb_scanning'), {
+        dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+        clip = 'machinic_loop_mechandplayer',
+        flag = 1
+    }, {
+        model = `w_am_digiscanner`,
+        pos = vec3(0.06, 0.03, -0.1),
+        rot = vec3(10.0, 190.0, 0.0)
     }) then
         lib.callback('qb_vehicle_tracker:isVehicleTracked', false, function(veh)
             if veh == nil then return uiNotify(locale('vt_no_tracker'), 'info') end
@@ -93,29 +84,16 @@ end)
 
 RegisterNetEvent('qb_vehicle_tracker:client:placeTracker', function(slot, serialNumber)
     local vehicle = lib.getClosestVehicle(GetEntityCoords(cache.ped), 2.5, true)
+    if vehicle == nil or not DoesEntityExist(vehicle) then uiNotify(locale('vt_no_vehicle_nearby'), 'error') return end
 
-    if vehicle == nil or not DoesEntityExist(vehicle) then return uiNotify(locale('vt_no_vehicle_nearby'), 'error') end
-
-    if lib.progressBar({
-        duration = 6000,
-        label = locale('vt_pb_placing'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            car = true,
-            move = true,
-            combat = true
-        },
-        anim = {
-            dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
-            clip = 'machinic_loop_mechandplayer',
-            flag = 1
-        },
-        prop = {
-            model = `prop_prototype_minibomb`,
-            pos = vec3(0.1, 0.03, -0.0),
-            rot = vec3(10.0, 160.0, 0.0)
-        }
+    if uiProgressBar(6000, locale('vt_pb_placing'), {
+        dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+        clip = 'machinic_loop_mechandplayer',
+        flag = 1
+    }, {
+        model = `prop_prototype_minibomb`,
+        pos = vec3(0.1, 0.03, -0.0),
+        rot = vec3(10.0, 160.0, 0.0)
     }) then
         lib.callback('qb_vehicle_tracker:placeTracker', false, function(success)
             if not success then return end
@@ -129,30 +107,17 @@ end)
 
 RegisterNetEvent('qb_vehicle_tracker:client:removeTracker', function(slot)
     local vehicle = lib.getClosestVehicle(GetEntityCoords(cache.ped), 3.0, true)
-
     if vehicle == nil or not DoesEntityExist(vehicle) then return uiNotify(locale('vt_no_vehicle_nearby'), 'error') end
 
     local vehPlate = GetVehicleNumberPlateText(vehicle)
 
     lib.callback('qb_vehicle_tracker:isVehicleTracked', false, function(veh)
         if veh == nil then return uiNotify(locale('vt_no_tracker'), 'info') end
-
-        if lib.progressBar({
-            duration = 6000,
-            label = locale('vt_pb_removing'),
-            useWhileDead = false,
-            canCancel = true,
-            disable = {
-                car = true,
-                move = true,
-                combat = true
-            },
-            anim = {
-                dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
-                clip = 'machinic_loop_mechandplayer',
-                flag = 1
-            }
-        }) then
+        if uiProgressBar(6000, locale('vt_pb_removing'), {
+            dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+            clip = 'machinic_loop_mechandplayer',
+            flag = 1
+        }, {}) then
             lib.callback('qb_vehicle_tracker:removeTracker', false, function(success)
                 if not success then return end
 
@@ -190,6 +155,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:locateTracker', function(serialNumbe
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentSubstringPlayerName('Tracker ' .. veh)
         EndTextCommandSetBlipName(blip)
+        SetNewWaypoint(vehCoords.x , vehCoords.y)
 
         trackedVehicles[serialNumber] = blip
 
@@ -203,8 +169,9 @@ CreateThread(function()
     while true do
         Wait(3000)
         for serialNumber, blip in pairs(trackedVehicles) do
-            if GetBlipAlpha(blip) > 0 then
-                SetBlipAlpha(blip, GetBlipAlpha(blip) - 10)
+            local blipAlpha = GetBlipAlpha(blip)
+            if blipAlpha > 0 then
+                SetBlipAlpha(blip, blipAlpha - 10)
             else
                 trackedVehicles[serialNumber] = nil
                 RemoveBlip(blip)
