@@ -23,6 +23,17 @@ local function uiProgressBar(duration, label, anim, prop)
     })
 end
 
+local function playSound(audioName, audioDict)
+    local soundId = GetSoundId()
+
+    PlaySoundFrontend(soundId, audioName, audioDict, false)
+
+    SetTimeout(3000, function()
+        StopSound(soundId)
+        ReleaseSoundId(soundId)
+    end)
+end
+
 -- Events
 RegisterNetEvent('qb_vehicle_tracker:client:manageTracker', function(serialNumber)
     lib.registerContext({
@@ -64,7 +75,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:scanTracker', function(slot)
         lib.callback('qb_vehicle_tracker:isVehicleTracked', false, function(veh)
             if veh == nil then return uiNotify(locale('vt_no_tracker'), 'info') end
 
-            TriggerEvent('InteractSound_CL:PlayOnOne', 'metaldetected', 0.3)
+            playSound('TIMER_STOP', 'HUD_MINI_GAME_SOUNDSET')
 
             local alert = lib.alertDialog({
                 header = locale('vt_alert_title'),
@@ -97,7 +108,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:placeTracker', function(slot, serial
     }) then
         lib.callback('qb_vehicle_tracker:placeTracker', false, function(success)
             if not success then return end
-            TriggerEvent('InteractSound_CL:PlayOnOne', 'Clothes1', 0.3)
+            playSound('Hack_Success', 'DLC_HEIST_BIOLAB_PREP_HACKING_SOUNDS')
             uiNotify(locale('vt_placed_success'), 'success')
         end, GetVehicleNumberPlateText(vehicle), slot, serialNumber)
     else
@@ -127,7 +138,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:removeTracker', function(slot)
                     trackedVehicles[veh.serialNumber] = nil
                 end
 
-                TriggerEvent('InteractSound_CL:PlayOnOne', 'metaldetector', 0.3)
+                playSound('Hack_Success', 'DLC_HEIST_BIOLAB_PREP_HACKING_SOUNDS')
                 uiNotify(locale('vt_remove_success'), 'success')
             end, vehPlate, slot)
         else
@@ -159,7 +170,7 @@ RegisterNetEvent('qb_vehicle_tracker:client:locateTracker', function(serialNumbe
 
         trackedVehicles[serialNumber] = blip
 
-        TriggerEvent('InteractSound_CL:PlayOnOne', 'monkeyopening', 0.3)
+        playSound('10_SEC_WARNING', 'HUD_MINI_GAME_SOUNDSET')
         uiNotify(locale('vt_connection_success'), 'success')
 
     end, serialNumber)
